@@ -1,30 +1,68 @@
-import map_data
-import enemies
-import data_location
-#I don't think I need to import enemy_info
-
-import pytmx
+import buttons
 import pygame
+import enemies
+import enemy_info
+import enemy_track
+pygame.init()
 
-#will eventually add selection so it will either be XMAS or TG map
-map_ = map_data.map_reader(data_location.christmas_map)
 
 #will eventually add enemies based on wave, probably a loop or something
-enemy = enemies.Enemy('snowman')
 
-#begins by displaying map
-#map_.display_map()
+buttons_obj = buttons.Buttons
 
+clock = pygame.time.Clock()
+
+enemy_track_run_count = 0
 def game_loop():
-    crashed = False
-    while not crashed:
-        map_.display_map()
-        enemy.draw()
-        pygame.time.delay(100)
 
+    #global so not creating new objects every iteration of loop
+    global buttons_obj
+
+    while not buttons.crashed:
+        buttons_obj()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                crashed = True
+                buttons.crashed = True
+        pygame.display.flip()
+        clock.tick(30)
+        while buttons.display_map and not buttons.crashed:
 
-        pygame.map_.display.flip()
-        map_.clock.tick(30)
+            '''if the modes display christmas map'''
+            if buttons.display_xmas_map and not buttons.crashed:
+                global enemy_track_run_count
+                buttons.map_data.display()
+                #pygame.time.delay(100)
+                for i in range(len(buttons.enemy_obj_list)):
+                    #print(buttons.enemy_obj_list)
+                    '''if buttons.enemy_obj_list[0][i].enemy_path_list_x[enemies.list_counter] == 832:
+                        print('LOOP PRINTED:', buttons.enemy_obj_list)
+                        del buttons.enemy_obj_list[i]
+                        print('DELETED')'''
+                #so the data doesn't process multiple times in this loop
+                if enemy_track_run_count < 1:
+                    enemy_track.game_xmas()
+                    enemy_track_run_count += 1
+
+
+                #pygame.display.flip()
+                clock.tick(30)
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        buttons.crashed = True
+
+            '''if button is thanksgiving'''
+
+
+            #pygame.time.delay(100)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    buttons.crashed = True
+
+            pygame.display.flip()
+            clock.tick(30)
+
+game_loop()
+pygame.quit()
+quit()
