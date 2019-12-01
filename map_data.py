@@ -11,6 +11,11 @@ pygame.init()
 current_mode = None
 xmas_map = None
 
+wave_counter = 0
+buttons_wave_counter_copy = None
+temp_enemy_list = []
+count = 0
+
 
 class map_reader:
 
@@ -22,10 +27,11 @@ class map_reader:
 
         # this info applies to both maps, so values don't have to be passed in
         self.enemy_Path_map_layer = self.map.get_layer_by_name('enemy_Path')
-        self.non_tower_Zone_map_layer = self.map.get_layer_by_name("non_tower_Zone")
+        self.tower_Zone_layer = self.map.get_layer_by_name("tower_Zone")
 
         # dimensions of each tile
         self.width = self.map.width * self.map.tilewidth
+
         self.height = self.map.height * self.map.tilewidth
 
         # used in read_map_data() function
@@ -46,10 +52,10 @@ class map_reader:
             self.enemy_path_list_y.append(enemy_path.y)
 
         # reads through layer that doesn't allow towers to be
-        for tower_null in self.non_tower_Zone_map_layer:
+        for tower_Zone in self.tower_zone_layer:
             # tuple data thrown into list
-            self.non_tower_zone_list.append(tower_null)
-        print(self.non_tower_zone_list)
+            self.non_tower_zone_list.append(tower_Zone)
+
         # assigns distances of each tile to dist_x and dist_y lists
         for i in range(len(self.enemy_path_list_x)):
 
@@ -78,6 +84,10 @@ class map_reader:
     # displays map to screen. Will be called a lot, meaning that methods it uses will also be called a lot
     def display_map(self):
         global current_mode
+        global wave_counter
+        global buttons_wave_counter_copy
+        global temp_enemy_list
+        global count
         self.map_img = self.make_map()
         self.map_rect = self.map_img.get_rect()
 
@@ -87,54 +97,65 @@ class map_reader:
         buttons.Game_Buttons().wave_button()
         buttons.Game_Buttons().stats_game_label()
 
-        '''enemy_list = [buttons.modes.enemy_amnt_list[buttons.player_obj.current_wave]]
-        print(enemy_list)
-        enemy_type_list = [[], [], []]
-        enemy_obj_list = [[], [], []]
-        if buttons.modes.MODE == 0 or buttons.modes.MODE == 1 or buttons.modes.MODE == 2:
+        # iterates the following if the next wave button has been clicked. Important because enemy_obj_list doesn't fill until next wave button has been clicked.
+        if buttons.wave_counter > -1:
+            buttons_wave_counter_copy = buttons.wave_counter
+            # The following is very important. You need to call .draw() each time the map is updated - this simulates movement for the enemies.
 
-            for i in len(enemy_list[0[0]]):
-                enemy_type_list[0][0].append(i + 1)
-                enemy_type_list[0][0][i] = enemies.Enemy_Type(enemy_info.enemy1_tg)
+            #loops through the range of enemy_obj_list
+            print('ENEMY OBJ TEST: ', buttons.enemy_obj_list)
+            for i in range(len(buttons.enemy_obj_list[0][buttons_wave_counter_copy])):
+                # blits over old enemy images (because Pygame fucking sucks and you can't just delete an old image)
+                data_location.display.blit(self.map_img, self.map_rect)
+                buttons.Game_Buttons().wave_button()
+                buttons.Game_Buttons().stats_game_label()
 
-                enemy_obj_list[0][0].append(enemies.Enemy(enemy_type_list[0][0][i]))
-            for i in len(enemy_list[0[1]]):
-                enemy_type_list[1][1].append(i + 1)
-                enemy_type_list[1][1][i] = enemies.Enemy_Type(enemy_info.enemy2_tg)
+                #print('ENEMY OBJ LIST', buttons.enemy_obj_list[buttons_wave_counter_copy])
 
-                enemy_obj_list[1][1].append(enemies.Enemy(enemy_type_list[1][1][i]))
-            for i in len(enemy_list[0[2]]):
-                enemy_type_list[2][2].append(i + 1)
-                enemy_type_list[2][2][i] = enemies.Enemy_Type(enemy_info.enemy3_tg)
+                if len(temp_enemy_list) < len(
+                        buttons.enemy_obj_list[0][buttons_wave_counter_copy]) and temp_enemy_list != buttons.enemy_obj_list[0][buttons_wave_counter_copy]:
+                    temp_enemy_list.append(buttons.enemy_obj_list[0][buttons_wave_counter_copy])
 
-                enemy_obj_list[2][2].append(enemies.Enemy(enemy_type_list[2][2][i]))
+                pygame.time.delay(10)
 
-            #enemy_type_list = [enemy_list[0][0] * enemy_info.enemy1_tg, enemy_list[1][1] * enemy_info.enemy2_tg, enemy_list[2][2] * enemy_info.enemy3_tg]
+                for u in range(len(temp_enemy_list)):
 
-        if buttons.modes.MODE == 3 or buttons.modes.MODE == 4 or buttons.modes.MODE == 5:
+                    if len(temp_enemy_list[buttons_wave_counter_copy]) > 1:
+                        temp_enemy_list[buttons_wave_counter_copy][u].draw()
+                        # is the enemy objects list_counter variable is 28(on the black tile, the end point), then blit over the enemy
+                        if temp_enemy_list[buttons_wave_counter_copy][u].list_counter == 28:
+                            data_location.display.blit(pygame.image.load(data_location.end_point),
+                                                       (data_location.WIDTH - 64, 64))
+                        # removes 1 life per enemy if enemy is on x val that begins at start of final tile
+                        if temp_enemy_list[buttons_wave_counter_copy][u].enemy_path_list_x[
+                            temp_enemy_list[buttons_wave_counter_copy][u].list_counter] == data_location.WIDTH - 64:
+                            del temp_enemy_list[buttons_wave_counter_copy][u]
 
-            for i in len(enemy_list[0[0]]):
-                enemy_type_list[0][0].append(i + 1)
-                enemy_type_list[0][0][i] = enemies.Enemy_Type(enemy_info.enemy1_xmas)
+                    # if only 1 enemy object in list
 
-                enemy_obj_list[0][0].append(enemies.Enemy(enemy_type_list[0][0][i]))
-            for i in len(enemy_list[0[1]]):
-                enemy_type_list[1][1].append(i + 1)
-                enemy_type_list[1][1][i] = enemies.Enemy_Type(enemy_info.enemy2_xmas)
+                    elif len(temp_enemy_list[buttons_wave_counter_copy]) == 1:
+                        print('COUNT AMNT TST:',temp_enemy_list[count])
+                        temp_enemy_list[count][0].draw()
+                        # is the enemy objects list_counter variable is 28(on the black tile, the end point), then blit over the enemy
+                        if temp_enemy_list[count][buttons_wave_counter_copy].list_counter == 28:
+                            data_location.display.blit(pygame.image.load(data_location.end_point),
+                                                       (data_location.WIDTH - 64, 64))
+                        # removes 1 life per enemy if enemy is on x val that begins at start of final tile
+                        if temp_enemy_list[count][buttons_wave_counter_copy].enemy_path_list_x[
+                            temp_enemy_list[count][buttons_wave_counter_copy].list_counter] == data_location.WIDTH - 64:
+                            del temp_enemy_list[count][buttons_wave_counter_copy]
+                    else:
+                        break
 
-                enemy_obj_list[1][1].append(enemies.Enemy(enemy_type_list[1][1][i]))
-            for i in len(enemy_list[0[2]]):
-                enemy_type_list[2][2].append(i + 1)
-                enemy_type_list[2][2][i] = enemies.Enemy_Type(enemy_info.enemy3_xmas)
+                        buttons.mode_obj.lives -= 1
 
-                enemy_obj_list[2][2].append(enemies.Enemy(enemy_type_list[2][2][i]))
-
-            print('ENEMY TYPE LIST:', enemy_type_list)
-            print('ENEMY OBJ LIST: ', enemy_obj_list)'''
+                if buttons_wave_counter_copy < buttons.wave_counter:
+                    del temp_enemy_list[buttons_wave_counter_copy]
+                    buttons_wave_counter_copy += 1
+                    count += 1
 
 
 def display():
-
     global xmas_map
     if buttons.MODE == 0 or buttons.MODE == 1 or buttons.MODE == 2:
         xmas_map = map_reader(data_location.xmas_map)

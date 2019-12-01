@@ -1,9 +1,11 @@
 import pygame
 import map_data
 import data_location
-import player
+# import player
 import enemies
 import enemy_info
+import towers
+import tower_info
 
 pygame.init()
 
@@ -11,12 +13,12 @@ pygame.init()
 crashed = False
 display_map = False
 display_xmas_map = False
+map_reader_obj = map_data.map_reader(data_location.xmas_map)
 
 clicked_normal = False
 clicked_hard = False
 clicked_psycho = False
-player_obj = None
-wave_counter = 0
+wave_counter = -1
 # If STATE is == 6 through 11, the purpose is to edit MODE in order to select the type of mode and display the corresponding map
 STATE = 0
 MODE = 99
@@ -24,6 +26,7 @@ BUTTON_ACTION = 200
 # Title, Settings, Level Selection, xmas selector, tg selection
 SCREENS = ['background_images/title/title_screen.png', None,
            'background_images/selection/christmas_selection.png']
+
 
 # depending on state, will draw buttons corresponding to state
 class Buttons:
@@ -87,7 +90,7 @@ class Buttons:
         print('settings-button')
 
     def mode_buttons(self):
-        global player_obj
+        #   global player_obj
         global MODE
         self.normal_button_dimension = (data_location.WIDTH - 210, 175, 210, 40)
         pygame.draw.rect(data_location.display, (0, 255, 255), pygame.Rect(self.normal_button_dimension))
@@ -113,35 +116,40 @@ class Buttons:
         if STATE == 2:
 
             if clicked_normal:
+
                 self.selection_is_over(self.normal_button_dimension, 98)
 
                 MODE = 0
 
                 mode_obj.set_normal()
-                player_obj = player.Player(MODE, mode_obj.waves, mode_obj.spawn_rate, mode_obj.starting_cash)
-                # print(modes.MODE, modes.mode_list)
+            #                player_obj = player.Player(MODE, mode_obj.waves, mode_obj.spawn_rate, mode_obj.starting_cash)
+            # print(modes.MODE, modes.mode_list)
             elif clicked_hard:
                 self.selection_is_over(self.hard_button_dimension, 98)
                 MODE = 1
 
                 mode_obj.set_hard()
-                player_obj = player.Player(MODE, mode_obj.waves, mode_obj.spawn_rate, mode_obj.starting_cash)
-                # print(modes.MODE, modes.mode_list)
+            #                player_obj = player.Player(MODE, mode_obj.waves, mode_obj.spawn_rate, mode_obj.starting_cash)
+            # print(modes.MODE, modes.mode_list)
             elif clicked_psycho:
                 self.selection_is_over(self.psycho_button_dimension, 98)
                 MODE = 2
                 mode_obj.set_psycho()
-                player_obj = player.Player(MODE, mode_obj.waves, mode_obj.spawn_rate, mode_obj.starting_cash)
-                # print(modes.MODE, modes.mode_list)
+        #      player_obj = player.Player(MODE, mode_obj.waves, mode_obj.spawn_rate, mode_obj.starting_cash)
+        # print(modes.MODE, modes.mode_list)
+
     def check_if_mode_clicked(self, button):
         global clicked_normal
         global clicked_hard
         global clicked_psycho
         mouse_pos = pygame.mouse.get_pos()
+
         if button[0] + button[2] > mouse_pos[0] > button[0] and button[1] + button[3] > mouse_pos[1] > button[1]:
             for event in pygame.event.get():
                 if button == self.normal_button_dimension and event.type == pygame.MOUSEBUTTONDOWN:
+
                     clicked_normal = True
+                    print(clicked_normal)
                 elif button == self.hard_button_dimension and event.type == pygame.MOUSEBUTTONDOWN:
                     clicked_hard = True
                 elif button == self.psycho_button_dimension and event.type == pygame.MOUSEBUTTONDOWN:
@@ -156,15 +164,13 @@ class Buttons:
             global display_map
             global display_xmas_map
 
-
             if STATE == 2 and state_next == 98:
+                print('PRINT TEST CLICKED_NORMAL')
                 display_map = True
                 display_xmas_map = True
                 # player_obj = player.Player(modes.MODE, modes.mode_list)
                 # print(modes.MODE, modes.mode_list)
                 # modes.display()
-
-
 
     def display_title(self):
         # STATE = 0
@@ -180,8 +186,6 @@ class Buttons:
 
     def display_selection_christmas(self):
         data_location.display.blit(pygame.image.load(SCREENS[STATE]), (0, 0))
-
-
 
     def set_mode_normal(self):
         global MODE
@@ -223,14 +227,21 @@ class Game_Buttons:
             self.pause_play_buttons()
 
     def stats_game_label(self):
-        global player_obj
+        #   global player_obj
         global wave_counter
         self.stats_rect = (0, 0, 64, 80)
-        pygame.draw.rect(data_location.display, (32,178,170), pygame.Rect(self.stats_rect))
+        pygame.draw.rect(data_location.display, (32, 178, 170), pygame.Rect(self.stats_rect))
         waves_label = pygame.font.SysFont('comicsans', 20).render('Waves:', 1, (0, 0, 0))
         data_location.display.blit(waves_label, (0, 0))
-        wave_count_label = pygame.font.SysFont('comicsans', 20).render(str(wave_counter) + '/' + str(mode_obj.waves), 1, (0, 0, 0))
+        wave_count_label = pygame.font.SysFont('comicsans', 20).render(
+            str(wave_counter + 1) + '/' + str(mode_obj.waves), 1, (0, 0, 0))
         data_location.display.blit(wave_count_label, (0, 20))
+        # money stat
+        money_label = pygame.font.SysFont('comicsans', 20).render('$' + str(mode_obj.cash), 1, (0, 0, 0))
+        data_location.display.blit(money_label, (0, 40))
+        # lives
+        lives_label = pygame.font.SysFont('comicsans', 20).render('Lives: ' + str(mode_obj.lives), 1, (0, 0, 0))
+        data_location.display.blit(lives_label, (0, 60))
 
     def wave_button(self):
 
@@ -239,7 +250,6 @@ class Game_Buttons:
         next_wave_button_label = pygame.font.SysFont('comicsans', 20).render('begin_wave', 1, (0, 0, 0))
         data_location.display.blit(next_wave_button_label, (data_location.WIDTH - 75, data_location.HEIGHT - 40))
         check_if_clicked(next_wave_button, 105)
-
 
     def pause_play_buttons(self):
         print('test')
@@ -262,6 +272,7 @@ class Game_Buttons:
                     pass
                     # self.player_obj.waves += 1
 
+
 def check_if_clicked(button, state_next):
     mouse_pos = pygame.mouse.get_pos()
     if button[0] + button[2] > mouse_pos[0] > button[0] and button[1] + button[3] > mouse_pos[1] > button[1]:
@@ -271,58 +282,65 @@ def check_if_clicked(button, state_next):
         pygame.draw.rect(data_location.display, (255, 0, 0), button)
 
         # state 98 and 100 represents null.
-        #next_wave button custom 105 STATE
+        # next_wave button custom 105 STATE
         for event in pygame.event.get():
             if state_next != 98 and event.type == pygame.MOUSEBUTTONDOWN:
                 STATE = state_next
-            #STATE = 105 means that wave_button was pressed.
+            # STATE = 105 means that wave_button was pressed.
             if STATE == 105 and event.type == pygame.MOUSEBUTTONDOWN:
-                 if wave_counter < len(mode_obj.enemy_amnt_list):
-                     wave_counter += 1
-                     spawn_next_wave_enemies()
+                if wave_counter < len(mode_obj.enemy_amnt_list):
+                    wave_counter += 1
+                    print('CLICK CONFIRMATION TEST - MODE SELECTED')
+                    spawn_next_wave_enemies()
+
 
 class Modes:
     def __init__(self):
         global MODE
-        self.normal_waves = 20
-        self.normal_spawn_rate = 1
-        self.normal_cash = 500
 
+        self.normal_waves = 20
+        self.normal_spawn_rate = 1000
+        self.normal_cash = 500
+        self.normal_lives = 60
         self.normal_enemy_multiplier = [[1, 0, 0], [2, 0, 0], [3, 1, 0], [5, 3, 0], [4, 7, 0],
-                                   [4, 9, 0], [5, 10, 0], [4, 5, 1], [4, 7, 1], [7, 10, 2],
-                                   [8, 12, 0], [10, 15, 0], [15, 12, 0], [18, 22, 5], [20, 26, 7],
-                                   [12, 15, 0], [17, 22, 2], [18, 27, 4], [28, 24, 4], [30, 30, 15]]
+                                        [4, 9, 0], [5, 10, 0], [4, 5, 1], [4, 7, 1], [7, 10, 2],
+                                        [8, 12, 0], [10, 15, 0], [15, 12, 0], [18, 22, 5], [20, 26, 7],
+                                        [12, 15, 0], [17, 22, 2], [18, 27, 4], [28, 24, 4], [30, 30, 15]]
+
         # wave, index of that wave,
         # print(normal_enemy_multiplier[3][1][0])
 
         self.hard_waves = 30
         self.hard_spawn_rate = 2
         self.hard_cash = 425
+        self.hard_lives = 45
         # 30 waves
         self.hard_enemy_multiplier = [[[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                 [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                 [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                 [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                 [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                 [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []]]
+                                      [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                      [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                      [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                      [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                      [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []]]
         self.psycho_waves = 55
         self.psycho_spawn_rate = 3
         self.psycho_cash = 350
+        self.psycho_lives = 25
         # 50 waves
         self.psycho_enemy_multiplier = [[[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
-                                   [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []]]
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []],
+                                        [[], [], []], [[], [], []], [[], [], []], [[], [], []], [[], [], []]]
         self.waves = None
         self.spawn_rate = None
-        self.starting_cash = None
+        self.cash = None
+        self.lives = None
         self.enemy_amnt_list = []
 
     # 0-2 thanksgiving: 0 =  normal, 1 = hard, 2 = psycho, #3-5 christmas: 3 = normal, 4 = hard, 5 = psycho
@@ -331,80 +349,90 @@ class Modes:
         if MODE == 0:
             self.waves = self.normal_waves
             self.spawn_rate = self.normal_spawn_rate
-            self.starting_cash = self.normal_cash
+            self.cash = self.normal_cash
+            self.lives = self.normal_lives
             self.enemy_amnt_list = self.normal_enemy_multiplier
-            #print(self.enemy_amnt_list)
+            # print(self.enemy_amnt_list)
 
     def set_hard(self):
 
         if MODE == 1:
             self.waves = self.hard_waves
             self.spawn_rate = self.hard_spawn_rate
-            self.starting_cash = self.hard_cash
+            self.cash = self.hard_cash
+            self.lives = self.hard_lives
             self.enemy_amnt_list = self.hard_enemy_multiplier
+
 
     def set_psycho(self):
 
         if MODE == 2:
             self.waves = self.psycho_waves
             self.spawn_rate = self.psycho_spawn_rate
-            self.starting_cash = self.psycho_cash
+            self.cash = self.psycho_cash
+            self.lives = self.psycho_lives
             self.enemy_amnt_list = self.psycho_enemy_multiplier
+
 
 mode_obj = Modes()
 
 '''ENEMY PROCESSOR:'''
 # contains list of enemies to be spawned according to the difficulty and current wave
-#enemy_list = [mode_obj.enemy_amnt_list[wave_counter]]
+# enemy_list = [mode_obj.enemy_amnt_list[wave_counter]]
 # print(enemy_list)
-enemy_obj_list = []
+enemy_obj_list = [[]]
 
 
-#called every time the next_wave button is clicked
+# called every time the next_wave button is clicked
 def spawn_next_wave_enemies():
     global enemy_obj_list
     # contains list of enemies to be spawned according to the difficulty and current wave
+    print('ENEMY AMNT LIST FROM MODE_OBJ:', mode_obj.enemy_amnt_list)
     enemy_list = mode_obj.enemy_amnt_list[wave_counter]
-
+    print('WAVE COUNTER: ', wave_counter)
     # loops through enemy amount values inside current wave
     '''unneccessary?'''
-    #for i in enemy_list:
+    # for i in enemy_list:
 
     temp_list = []
-
+    print('ENEMY LIST:', enemy_list)
+    # Goes through first index of current wave
     for a in range(enemy_list[0]):
         temp_list.append(enemies.Enemy(enemies.Enemy_Type(enemy_info.enemy1_xmas)))
 
-    enemy_obj_list.append(temp_list)
-    #print(i)
-    print('1st enemy:', enemy_obj_list)
+    enemy_obj_list[0].append(temp_list)
+    print('ENEMY 1 TYPE APPENDED - ',enemy_obj_list)
+    # print(i)
+    #print('1st enemy:', enemy_obj_list[0])
 
     temp_list = []
-    #if has 2 types of enemies for that wave
+    # if has 2nd enemy type in wave, goes through 2nd index of current wave
     if enemy_list[1] > 0:
         for b in range(enemy_list[1]):
             temp_list.append(enemies.Enemy(enemies.Enemy_Type(enemy_info.enemy2_xmas)))
-        enemy_obj_list.append(temp_list)
-        print('2nd enemy:', enemy_obj_list)
-
+        enemy_obj_list[0].append(temp_list)
+        print('ENEMY 2 TYPE APPENDED - ', enemy_obj_list)
+        #print('2nd enemy:', enemy_obj_list[1])
 
     temp_list = []
-    #if has 3 types of enemies for that wave
+    # if has 3rd enemy type in wave, goes through 3rd index of current wave
     if enemy_list[2] > 0:
         for c in range(enemy_list[2]):
             temp_list.append(enemies.Enemy(enemies.Enemy_Type(enemy_info.enemy3_xmas)))
-        enemy_obj_list.append(temp_list)
-        print('3rd enemy:', enemy_obj_list)
+        enemy_obj_list[0].append(temp_list)
+        #print('3rd enemy:', enemy_obj_list[2])
+        print('ENEMY 3 TYPE APPENDED - ',enemy_obj_list)
 
-    #enemy_obj_list[0][2] = (enemies.Enemy(enemy_list[0][i][2]) * enemy_info.enemy2_xmas)
+tower_info.tower_zones_available()
+tower_list = []
+for event in pygame.event.get():
 
-# Loops through enemy_obj_list
-    for i in range(len(enemy_obj_list)):
-        #loops through the list enemy x's amount of objects, draws each of them.
-        for a in enemy_obj_list[i]:
+    print(tower_info.tower_zones_list[0].y)
+    rect_dimension = (tower_info.tower_zones_list[0].x, tower_info.tower_zones_list[0].y, 64, 64)
+    rect = pygame.draw.rect(data_location.display, (75, 0, 130), pygame.Rect(rect_dimension))
+    mouse_pos = pygame.mouse.get_pos()
+    if rect[0] + rect[2] > mouse_pos[0] > rect[0] and rect[1] + rect[3] > mouse_pos[1] > rect[1] \
+            and event.type == pygame.MOUSEBUTTONDOWN:
 
-            a.draw()
-
-#After each iteration of method, it's important that enemy_obj_list is set back to empty
-
-# print('ENEMY OBJ LIST: ', enemy_obj_list)
+        print('test')
+        pass

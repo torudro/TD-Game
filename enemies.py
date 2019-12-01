@@ -13,14 +13,14 @@ class Enemy_Type:
 
 
 
-list_counter = 0
+#list_counter = 0
 class Enemy:
 
     def __init__(self, enemy_type):
         
         #again, depending on settings, will either be XMAS or TG
 
-        global list_counter
+        self.list_counter = 0
         self.dead = False
         self.worth = enemy_type.worth
         self.speed = enemy_type.speed
@@ -40,36 +40,47 @@ class Enemy:
         self.direction_up = False
         self.direction_down = False
 
+        self.stop_list_count = False
+        self.cont_list_count = False
+
         #to be able to go through lists
 
 
         self.enemy_path_list_x = enemy_track.enemy_path_list_x
         self.enemy_path_list_y = enemy_track.enemy_path_list_y
+    def continue_list_counter(self):
+        self.stop_list_count = False
+        self.cont_list_count = True
+        self.list_counter += 1
+    def stop_list_counter(self):
+        self.stop_list_count = False
+        self.stop_list_count = True
 
     def draw(self):
-        global list_counter
-        print('LIST COUNTER: ',list_counter)
+
+        #print('LIST COUNTER: ',self.list_counter)
         #used for loops - current position in enemy_path_list_x or _y
         #self.list_counter = 0
-        self.incr_x = enemy_track.enemy_path_list_x[list_counter] + enemy_track.dist_x_list[list_counter] * (1/self.speed)
+        self.incr_x = self.enemy_path_list_x[self.list_counter] + enemy_track.dist_x_list[self.list_counter] * (1/self.speed)
 
-        self.incr_y = enemy_track.enemy_path_list_y[list_counter] + enemy_track.dist_y_list[list_counter] * (1/self.speed)
-        self.decr_y = enemy_track.enemy_path_list_y[list_counter] - enemy_track.dist_y_list[list_counter] * (1/self.speed)
+        self.incr_y = self.enemy_path_list_y[self.list_counter] + enemy_track.dist_y_list[self.list_counter] * (1/self.speed)
+        self.decr_y = self.enemy_path_list_y[self.list_counter] - enemy_track.dist_y_list[self.list_counter] * (1/self.speed)
 
         
         #image drawn to surface with tuple as dimensions
         self.image_display_dimensions = pygame.Surface((59, 64))
 
         #gives enemy a collision area that's the same location of the image so it can be hit/know if at endpoint
-        self.image_display_dimensions.get_rect(center = (enemy_track.enemy_path_list_x[list_counter], enemy_track.enemy_path_list_y[list_counter]))
+        self.image_display_dimensions.get_rect(center = (self.enemy_path_list_x[self.list_counter], self.enemy_path_list_y[self.list_counter]))
         
         #subtracts 59 from x and 64 from y because they have to adapt to the location of the points on the map
-        data_location.display.blit(self.rotated_image, (enemy_track.enemy_path_list_x[list_counter] - 59, enemy_track.enemy_path_list_y[list_counter] - 64))
+        data_location.display.blit(self.rotated_image, (self.enemy_path_list_x[self.list_counter] - 59, self.enemy_path_list_y[self.list_counter] - 64))
+        #print(enemy_track.enemy_path_list_x[list_counter])
 
         #doesn't need to be called in for loop because it's only necessary for each central tile point (not fractions of it)
-        if enemy_track.enemy_path_list_x[list_counter] < enemy_track.enemy_path_list_x[len(enemy_track.enemy_path_list_x) - 1] \
-                and enemy_track.enemy_path_list_x[list_counter + 1] >= enemy_track.enemy_path_list_x[list_counter] \
-                and enemy_track.enemy_path_list_y[list_counter] == enemy_track.enemy_path_list_y[list_counter]:
+        if self.enemy_path_list_x[self.list_counter] < self.enemy_path_list_x[len(self.enemy_path_list_x) - 1] \
+                and self.enemy_path_list_x[self.list_counter + 1] >= self.enemy_path_list_x[self.list_counter] \
+                and self.enemy_path_list_y[self.list_counter] == self.enemy_path_list_y[self.list_counter]:
             self.direction_up = False
             self.direction_down = False
             self.direction_right = True
@@ -78,8 +89,8 @@ class Enemy:
             #orientates facing right
             self.rotated_image = pygame.transform.rotate(self.enemy_image, 0)
         #first condition can be x or y, doesn't matter. if next y pos is less than, then the enemy is going up
-        if enemy_track.enemy_path_list_x[list_counter] < enemy_track.enemy_path_list_x[len(enemy_track.enemy_path_list_x) - 1] \
-                and enemy_track.enemy_path_list_y[list_counter + 1] < enemy_track.enemy_path_list_y[list_counter]:
+        if self.enemy_path_list_x[self.list_counter] < self.enemy_path_list_x[len(self.enemy_path_list_x) - 1] \
+                and self.enemy_path_list_y[self.list_counter + 1] < self.enemy_path_list_y[self.list_counter]:
             self.direction_right = False
             self.direction_down = False
             self.direction_up = True
@@ -89,8 +100,8 @@ class Enemy:
 
             self.rotated_image = pygame.transform.rotate(self.enemy_image, 90)
         #down direction because greater than sign       
-        if enemy_track.enemy_path_list_x[list_counter] < enemy_track.enemy_path_list_x[len(enemy_track.enemy_path_list_x) - 1] \
-                and enemy_track.enemy_path_list_y[list_counter + 1] > enemy_track.enemy_path_list_y[list_counter]:
+        if self.enemy_path_list_x[self.list_counter] < self.enemy_path_list_x[len(self.enemy_path_list_x) - 1] \
+                and self.enemy_path_list_y[self.list_counter + 1] > self.enemy_path_list_y[self.list_counter]:
             self.direction_right = False
             self.direction_up = False
             self.direction_down = True
@@ -98,8 +109,13 @@ class Enemy:
 
                #orientates facing down
             self.rotated_image = pygame.transform.rotate(self.enemy_image, 270)
+        #Makes it so the enemy does not move anymore.
+        if self.list_counter < 28:
+            self.continue_list_counter()
+        if self.list_counter == 28:
+            self.stop_list_counter()
         #loop dependent on how many tiles the enemy moves per second. goes speed-1 times because don't want to draw to same tile point twice
-        '''for i in range(1, self.speed):
+'''        for i in range(1, self.speed):
 
 
             #important because every iteration we want to display new map to get rid of old enemy img files from previous location
@@ -122,6 +138,6 @@ class Enemy:
 '''
             
         #might be okay to add this before the for loop    
-        list_counter +=1
-            
+            #self.list_counter += 1
+
             
