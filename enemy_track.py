@@ -1,24 +1,26 @@
 import pygame
 import buttons
 import pytmx
-import data_location
+import settings
+
 pygame.init()
-#gets enemy path list from map_data to negate circular dependencies
+# gets enemy path list from map_data to negate circular dependencies
 enemy_path_list_x = []
 enemy_path_list_y = []
 dist_x_list = []
 dist_y_list = []
 
-
 '''IF MAP IS XMAS'''
+
+
 def game_xmas():
-    #if buttons.MODE == 3 or buttons.MODE == 4 or buttons.MODE == 5:
-    xmas_map = pytmx.load_pygame(data_location.xmas_map, pixelalpha=True)
+    # if buttons.MODE == 3 or buttons.MODE == 4 or buttons.MODE == 5:
+    xmas_map = pytmx.load_pygame(settings.xmas_map, pixelalpha=True)
     enemy_Path_map_layer = xmas_map.get_layer_by_name('enemy_Path')
     # reads through layer in map_type file and appends info from that to lists
     for enemy_path in enemy_Path_map_layer:
         enemy_path_list_x.append(enemy_path.x)
-        #print(enemy_path_list_x.append(enemy_path.x))
+        # print(enemy_path_list_x.append(enemy_path.x))
         enemy_path_list_y.append(enemy_path.y)
 
     # assigns distances of each tile to dist_x and dist_y lists

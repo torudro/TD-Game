@@ -1,9 +1,9 @@
 import pygame
 import pytmx
-import data_location
+import settings
 import buttons
-
-# import enemy_info
+import tile_clicked
+import tower_enemy_info
 # import enemies
 pygame.init()
 
@@ -15,7 +15,6 @@ wave_counter = 0
 buttons_wave_counter_copy = None
 temp_enemy_list = []
 count = 0
-
 
 class map_reader:
 
@@ -37,7 +36,7 @@ class map_reader:
         # used in read_map_data() function
         self.enemy_path_list_x = []
         self.enemy_path_list_y = []
-        self.non_tower_zone_list = []
+        self.tower_zone_list = []
 
         # for getting distance between tiles. used in enemy
         self.dist_x = []
@@ -52,9 +51,9 @@ class map_reader:
             self.enemy_path_list_y.append(enemy_path.y)
 
         # reads through layer that doesn't allow towers to be
-        for tower_Zone in self.tower_zone_layer:
+        for tower_Zone in self.tower_Zone_layer:
             # tuple data thrown into list
-            self.non_tower_zone_list.append(tower_Zone)
+            self.tower_zone_list.append(tower_Zone)
 
         # assigns distances of each tile to dist_x and dist_y lists
         for i in range(len(self.enemy_path_list_x)):
@@ -93,27 +92,45 @@ class map_reader:
 
         # surface, from make_map, used as the surface to be displayed, dimensions, map_rect, used from make_map()'s surface rec area
 
-        data_location.display.blit(self.map_img, self.map_rect)
+        settings.display.blit(self.map_img, self.map_rect)
         buttons.Game_Buttons().wave_button()
         buttons.Game_Buttons().stats_game_label()
+        mouse_pos = pygame.mouse.get_pos()
+        #For Towers:
+        tile_clicked.click_tile()
 
-        # iterates the following if the next wave button has been clicked. Important because enemy_obj_list doesn't fill until next wave button has been clicked.
+        if tile_clicked.display_creation_buttons1:
+            tile_clicked.tower_creation_buttons(tile_clicked.tile1.x, tile_clicked.tile1.y)
+        if tile_clicked.display_creation_buttons2:
+            tile_clicked.tower_creation_buttons(tile_clicked.tile2.x, tile_clicked.tile2.y)
+        if tile_clicked.display_creation_buttons3:
+            tile_clicked.tower_creation_buttons(tile_clicked.tile3.x, tile_clicked.tile3.y)
+        if tile_clicked.display_creation_buttons4:
+            tile_clicked.tower_creation_buttons(tile_clicked.tile4.x, tile_clicked.tile4.y)
+        if tile_clicked.display_creation_buttons5:
+            tile_clicked.tower_creation_buttons(tile_clicked.tile5.x, tile_clicked.tile5.y)
+        if tile_clicked.display_creation_buttons6:
+            tile_clicked.tower_creation_buttons(tile_clicked.tile6.x, tile_clicked.tile6.y)
+
+
+        #iterates the following if the next wave button has been clicked. Important because enemy_obj_list doesn't fill until next wave button has been clicked.
         if buttons.wave_counter > -1:
             buttons_wave_counter_copy = buttons.wave_counter
             # The following is very important. You need to call .draw() each time the map is updated - this simulates movement for the enemies.
 
-            #loops through the range of enemy_obj_list
-            print('ENEMY OBJ TEST: ', buttons.enemy_obj_list)
+            # loops through the range of enemy_obj_list
+            print('ENEMY OBJ LIST:',buttons.enemy_obj_list)
             for i in range(len(buttons.enemy_obj_list[0][buttons_wave_counter_copy])):
                 # blits over old enemy images (because Pygame fucking sucks and you can't just delete an old image)
                 data_location.display.blit(self.map_img, self.map_rect)
                 buttons.Game_Buttons().wave_button()
                 buttons.Game_Buttons().stats_game_label()
 
-                #print('ENEMY OBJ LIST', buttons.enemy_obj_list[buttons_wave_counter_copy])
+                # print('ENEMY OBJ LIST', buttons.enemy_obj_list[buttons_wave_counter_copy])
 
                 if len(temp_enemy_list) < len(
-                        buttons.enemy_obj_list[0][buttons_wave_counter_copy]) and temp_enemy_list != buttons.enemy_obj_list[0][buttons_wave_counter_copy]:
+                        buttons.enemy_obj_list[0][buttons_wave_counter_copy]) and temp_enemy_list != \
+                        buttons.enemy_obj_list[0][buttons_wave_counter_copy]:
                     temp_enemy_list.append(buttons.enemy_obj_list[0][buttons_wave_counter_copy])
 
                 pygame.time.delay(10)
@@ -134,7 +151,7 @@ class map_reader:
                     # if only 1 enemy object in list
 
                     elif len(temp_enemy_list[buttons_wave_counter_copy]) == 1:
-                        print('COUNT AMNT TST:',temp_enemy_list[count])
+                        #print('COUNT AMNT TST:', temp_enemy_list[count])
                         temp_enemy_list[count][0].draw()
                         # is the enemy objects list_counter variable is 28(on the black tile, the end point), then blit over the enemy
                         if temp_enemy_list[count][buttons_wave_counter_copy].list_counter == 28:
