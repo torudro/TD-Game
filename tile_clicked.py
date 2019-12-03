@@ -1,6 +1,7 @@
 import pygame
 import settings
 import tower_enemy_info
+import towers
 pygame.init()
 tower_enemy_info.tower_zones_available()
 tower_zones_list = tower_enemy_info.tower_zones_list
@@ -63,23 +64,8 @@ def cancel_button(x, y):
     pygame.draw.rect(settings.display, (255, 0, 0), pygame.Rect(cancel_button))
     cancel_button_label = pygame.font.SysFont('comicsans', 20).render('cancel [c]', 1, (0, 0, 0))
     settings.display.blit(cancel_button_label, (x + 64, y))
-def upgrade_button(x, y, towerobj):
-    upgrade_button = (x + 35, y + 64, 80, 40)
-    pygame.draw.rect(settings.display, (210, 180, 140), pygame.Rect(upgrade_button))
-    upgrade_label = pygame.font.SysFont('comicsans', 20).render('upgrade $' + str(towerobj.upgrade) + ' [z]', 1, (0, 0, 0))
-    settings.display.blit(upgrade_label, (x + 35, y + 64))
 def sell_button(x, y, towerobj):
     sell_button = (x + 35, y - 76, 60, 40)
     pygame.draw.rect(settings.display, (210, 180, 140), pygame.Rect(sell_button))
     sell_label = pygame.font.SysFont('comicsans', 20).render('sell $' + str(towerobj.resell) + ' [x]', 1, (0, 0, 0))
     settings.display.blit(sell_label, (x + 35, y - 76))
-def to_beige(x, y):
-    to_beige = (x - 64, y - 32, 60, 40)
-    pygame.draw.rect(settings.display, (210, 180, 140), pygame.Rect(to_beige))
-    to_beige_label = pygame.font.SysFont('comicsans', 20).render('--> beige [a]', 1, (0, 0, 0))
-    settings.display.blit(to_beige_label, (x - 64, y - 32))
-def to_blue(x, y):
-    to_blue = (x - 64, y + 32, 60, 40)
-    pygame.draw.rect(settings.display, (210, 180, 140), pygame.Rect(to_blue))
-    to_blue_label = pygame.font.SysFont('comicsans', 20).render('--> blue [s]', 1, (0, 0, 0))
-    settings.display.blit(to_blue_label, (x - 64, y + 32))

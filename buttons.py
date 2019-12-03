@@ -29,13 +29,13 @@ def button_clicked(button, state_next):
                 global display_map
                 display_map = True
                 map_obj = map_data.map_reader(settings.xmas_map)
-            if state_next == 105 and event.type == pygame.MOUSEBUTTONDOWN:
-                print('BUTTON CLICKED')
+        if events.type == pygame.KEYUP:
+            if events.key == pygame.K_TAB:
                 STATE = state_next
                 if wave_counter < len(level_settings_obj.enemy_amnt_list):
                     wave_counter += 1
-
                     spawn_next_wave_enemies()
+
 # depending on state, will draw buttons corresponding to state
 class TitleButtons:
     def __init__(self):
@@ -88,14 +88,18 @@ class Game_Buttons:
         lives_label = pygame.font.SysFont('comicsans', 20).render('Lives: ' + str(level_settings_obj.lives), 1,(0, 0, 0))
         settings.display.blit(lives_label, (0, 60))
     def wave_button(self):
-        next_wave_button = (settings.WIDTH - 75, settings.HEIGHT - 40, 75, 40)
+        next_wave_button = (settings.WIDTH - 115, settings.HEIGHT - 40, 115, 40)
         pygame.draw.rect(settings.display, (255, 20, 147), pygame.Rect(next_wave_button))
-        next_wave_button_label = pygame.font.SysFont('comicsans', 20).render('begin_wave', 1, (0, 0, 0))
-        settings.display.blit(next_wave_button_label, (settings.WIDTH - 75, settings.HEIGHT - 40))
+        next_wave_button_label = pygame.font.SysFont('comicsans', 20).render('begin_wave [TAB]', 1, (0, 0, 0))
+        settings.display.blit(next_wave_button_label, (settings.WIDTH - 115, settings.HEIGHT - 40))
         button_clicked(next_wave_button, 105)
     # method for turning true and false - use pygame.time.wait()
-    def pause_play_buttons(self):
-        print('test')
+    def quit(self):
+        button = (0, 0, 896, 576)
+        pygame.draw.rect(settings.display, (255, 0, 255), pygame.Rect(button))
+        button_label = pygame.font.SysFont('comicsans', 35).render('QUIT [DOWN ARROW]', 1, (0, 0, 0))
+        settings.display.blit(button_label, (0, 0))
+
 class LevelSettings:
     def __init__(self):
         self.waves = 20
@@ -107,39 +111,38 @@ class LevelSettings:
                                 [8, 12, 0], [10, 15, 0], [15, 12, 0], [18, 22, 5], [20, 26, 7],
                                 [12, 15, 0], [17, 22, 2], [18, 27, 4], [28, 24, 4], [30, 30, 15]]
 level_settings_obj = LevelSettings()
-enemy_obj_list = []
+enemy1_obj_list = []
+enemy2_obj_list = []
+enemy3_obj_list = []
+ENEMY_OBJ_LIST = []
 # called every time the next_wave button is clicked
 def spawn_next_wave_enemies():
-    global enemy_obj_list
+    global enemy1_obj_list
+    global enemy2_obj_list
+    global enemy3_obj_list
+    global ENEMY_OBJ_LIST
+    #enemy list set to current wave list
     enemy_list = level_settings_obj.enemy_amnt_list[wave_counter]
     temp_list = []
     print('ENEMY LIST:', enemy_list)
     # Goes through first index of current wave
     for a in range(enemy_list[0]):
         temp_list.append(enemies.Enemy(enemies.Enemy_Type(tower_enemy_info.enemy1_xmas)))
-    enemy_obj_list[0].append(temp_list)
+    #Enemy 1 list set to enemy1 objects found
+    enemy1_obj_list = temp_list
     temp_list = []
-    # if has 2nd enemy type in wave, goes through 2nd index of current wave
-    if enemy_list[1] > 0:
-        for b in range(enemy_list[1]):
-            temp_list.append(enemies.Enemy(enemies.Enemy_Type(tower_enemy_info.enemy2_xmas)))
-        enemy_obj_list[0].append(temp_list)
-        print('ENEMY 2 TYPE APPENDED - ', enemy_obj_list)
-        # print('2nd enemy:', enemy_obj_list[1])
+
+    for b in range(enemy_list[1]):
+        temp_list.append(enemies.Enemy(enemies.Enemy_Type(tower_enemy_info.enemy2_xmas)))
+    enemy2_obj_list = temp_list
+
     temp_list = []
-    # if has 3rd enemy type in wave, goes through 3rd index of current wave
-    if enemy_list[2] > 0:
-        for c in range(enemy_list[2]):
-            temp_list.append(enemies.Enemy(enemies.Enemy_Type(tower_enemy_info.enemy3_xmas)))
-        enemy_obj_list[0].append(temp_list)
-tower_enemy_info.tower_zones_available()
-tower_list = []
-for event in pygame.event.get():
-    print(tower_enemy_info.tower_zones_list[0].y)
-    rect_dimension = (tower_enemy_info.tower_zones_list[0].x, tower_enemy_info.tower_zones_list[0].y, 64, 64)
-    rect = pygame.draw.rect(settings.display, (75, 0, 130), pygame.Rect(rect_dimension))
-    mouse_pos = pygame.mouse.get_pos()
-    if rect[0] + rect[2] > mouse_pos[0] > rect[0] and rect[1] + rect[3] > mouse_pos[1] > rect[1] \
-            and event.type == pygame.MOUSEBUTTONDOWN:
-        print('test')
-        pass
+
+    for c in range(enemy_list[2]):
+        temp_list.append(enemies.Enemy(enemies.Enemy_Type(tower_enemy_info.enemy3_xmas)))
+    enemy3_obj_list = temp_list
+    ENEMY_OBJ_LIST = enemy1_obj_list
+    if len(enemy2_obj_list) > 0:
+        ENEMY_OBJ_LIST.extend(enemy2_obj_list)
+    if len(enemy3_obj_list) > 0:
+        ENEMY_OBJ_LIST.extend(enemy3_obj_list)
