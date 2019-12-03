@@ -1,11 +1,6 @@
 import pygame
-import pytmx
-import tower_enemy_info
 import settings
-
 pygame.init()
-
-
 class Tower_Type:
     def __init__(self, *args):
         self.price = args[0][0]
@@ -16,10 +11,7 @@ class Tower_Type:
         self.radius = args[0][5]
         self.image = args[0][6]
         self.image = pygame.image.load(self.image)
-
-
 class Tower:
-
     def __init__(self, tower_type):
         self.destroy = False
         self.price = tower_type.price
@@ -29,7 +21,6 @@ class Tower:
         self.speed = tower_type.speed
         self.radius = tower_type.radius
         self.image = tower_type.image
-
     # each time a tower is upgrades, a new object will just be created in it's place in the same location.
     def draw(self, x, y):
         settings.display.blit(self.image, (x, y))

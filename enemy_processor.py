@@ -1,14 +1,11 @@
 import buttons
 import enemies
 import tower_enemy_info
-
 # contains list of enemies to be spawned according to the difficulty and current wave
 enemy_list = [buttons.mode_obj.enemy_amnt_list[buttons.wave_counter]]
 # print(enemy_list)
 enemy_type_list = [[], [], []]
 enemy_obj_list = [[], [], []]
-
-
 # needs to be a method that gets - called every time the next_wave button is clicked
 def next_wave_enemies():
     # if buttons.MODE == 0 or buttons.MODE == 1 or buttons.MODE == 2:
@@ -22,7 +19,3 @@ def next_wave_enemies():
     # Loops through enemy_obj_list, calling draw() for each of them.
     for i in range(len(enemy_obj_list[0])):
         enemy_obj_list[0][i].draw()
-        # may be necessary
-        # buttons.map_data.display()
-
-    # print('ENEMY OBJ LIST: ', enemy_obj_list)
